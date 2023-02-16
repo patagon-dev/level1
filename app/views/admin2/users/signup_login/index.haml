@@ -1,0 +1,48 @@
+- content_for :title do
+  = t('admin2.sidebar.users.signup_login')
+
+.content-card-header
+  %h1.content-card-header-title
+    = t('admin2.sidebar.users.signup_login')
+
+.content-card-section-container
+  = form_for @current_community, url: update_signup_login_admin2_users_signup_login_index_path, html: { multipart: true, class: %i[content-card-section-form], remote: true }, method: :patch do |form|
+    %section.content-card-section
+      %h2= t('admin2.signup_login.invite_only')
+      .form-group
+        .form-check
+          = form.check_box :join_with_invite_only, class: %i[form-check-input]
+          = form.label :join_with_invite_only, t('admin2.user_rights.join_with_invite_only'), class: %i[form-check-label]
+
+    %section.content-card-section
+      %h2
+        = t('admin2.signup_login.signup_header')
+      %p.ingress
+        = t('admin2.signup_login.signup_info_text')
+      .form-group
+        %label.openInEditor{for: 'signup_info_content'}
+          = t('admin2.signup_login.signup_header')
+          %a{id: :edit_link, href: "/editor" + request.path, data: { save_url: mercury_update_path }}
+            = image_tag 'svg/edit.svg', alt: 'edit'
+            = t('admin2.open_in_editor')
+
+        #signup_info_content{data: {mercury: :full}}
+          = @community_customization.signup_info_content&.html_safe
+        %small#marketplaceName-help.form-text
+          = t('admin2.privacy.small_text', language: get_full_locale_name(I18n.locale))
+
+    = render 'facebook', form: form
+    = render 'google', form: form
+    = render 'linked_in', form: form
+
+    %section.content-card-terminal.without-margin.remove-from-mercury
+      = render 'admin2/submit_button', caption: t('admin2.save_changes')
+
+- content_for :extra_javascript do
+  :javascript
+    admin2_social_media_form("#{@current_community.id}", "#{t('admin2.signup_login.invalid_twitter_handle')}", "#{t('admin2.signup_login.invalid_facebook_connect_id')}", "#{t('admin2.signup_login.invalid_facebook_connect_secret')}" );
+
+:javascript
+    $(window).on('mercury:ready', function() {
+      $('.remove-from-mercury').hide();
+    })

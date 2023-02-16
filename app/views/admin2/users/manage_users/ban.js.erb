@@ -1,0 +1,12 @@
+<% if @error.present? %>
+  showError('<%= j @error %>');
+<% else %>
+  banMembership(<%= j @service.membership.id.to_s %>);
+  processDeleteUser('<%= @service.membership.id %>', <%= @can_delete %>, '<%= j @delete_title %>');
+  var current = $('#status_').val();
+  $('#user_statuses_filter').html('<%= j render 'admin2/users/manage_users/statuses', presenter: @presenter, current: nil %>');
+  $('#status_').val(current);
+  $('.membership-row-<%= @service.membership.id %>').html('<%= j render 'admin2/users/manage_users/one_row', membership: @service.membership %>');
+<% end %>
+
+$('#userRevokeAdminRightsModal').modal('hide');

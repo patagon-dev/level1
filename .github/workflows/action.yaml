@@ -1,0 +1,73 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'staging'
+jobs:
+  ci-build-job:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[Deploy]')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set outputs
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Extract branch name
+        shell: bash
+        run: echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+      - name: Extract namespace name
+        run: echo "::set-output name=namespace::$([ ${GITHUB_REF#refs/heads/} = "master" ] && echo level1)"
+        id: extract_namespace
+      - name: Extract helm values file
+        run: echo "::set-output name=helm_values_file::$([ ${GITHUB_REF#refs/heads/} = "master" ] && echo values-prod || echo values-staging)"
+        id: extract_helm_values_file
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          build-args: |
+            GITHUB_USER=${{ secrets.DEPLOY_GITHUB_USER }}
+            GITHUB_TOKEN=${{ secrets.DEPLOY_GITHUB_TOKEN }}
+          tags: marketshop/sharetribe_level1:${{ steps.extract_branch.outputs.branch }}-latest
+      - uses: azure/setup-helm@v1
+        with:
+          version: 'v3.2.4'
+        name: install helm
+      - name: configure Kubernetes
+        run: echo "${{ secrets.KUBECONFIG_CONTENT }}" > /tmp/kubeconfig
+      - name: upgrade helm release
+        working-directory: .helm
+        run: helm upgrade $HELM_RELEASE_NAME . -f values.yaml -f $VALUES_FILE.yaml -n $NAMESPACE
+        env:
+          HELM_RELEASE_NAME: sharetribe-level1
+          NAMESPACE: ${{ steps.extract_namespace.outputs.namespace }}
+          KUBECONFIG: /tmp/kubeconfig
+          VALUES_FILE: ${{ steps.extract_helm_values_file.outputs.helm_values_file }}
+      - name: Sleep for 150 seconds
+        run: sleep 150s
+        shell: bash
+      - name: Get Pod Name
+        working-directory: .helm
+        run: echo "::set-output name=podname::$(kubectl get pods -n level1 --no-headers -o custom-columns=":metadata.name" | grep sharetribe-level1)"
+        id: extract_podname
+        env:
+          HELM_RELEASE_NAME: sharetribe-level1
+          KUBECONFIG: /tmp/kubeconfig
+      - name: Run Kubectl Command
+        working-directory: .helm
+        run: kubectl exec -i -n level1 $POD_NAME -- bash -c "/opt/app/bundle exec rake jobs:work 2> /dev/null &"
+        env:
+          KUBECONFIG: /tmp/kubeconfig
+          POD_NAME: ${{ steps.extract_podname.outputs.podname }}

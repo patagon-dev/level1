@@ -1,0 +1,29 @@
+- content_for :title do
+  = t('admin2.sidebar.design.logos_and_color')
+
+.content-card-header
+  %h1.content-card-header-title
+    = t('admin2.sidebar.design.logos_and_color')
+
+.content-card-section-container
+  = form_for @current_community, url: update_logos_color_admin2_design_logos_color_index_path, html: { multipart: true, class: %i[content-card-section-form form-with-files] }, method: :patch do |form|
+    = render 'logos', form: form
+    = render 'color', form: form
+    = render 'favicon', form: form
+    %section.content-card-terminal
+      = render 'admin2/submit_button', caption: t('admin2.save_changes')
+
+:javascript
+  $(function(){
+    $("#colorpicker-color").spectrum({
+            color: $(this).val(),
+            showInput: true,
+            preferredFormat: "hex",
+            showPalette: true,
+            showSelectionPalette: false,
+            chooseText: "#{t('admin2.chooseText')}",
+            cancelText: "#{t('admin2.cancelText')}",
+            palette: [["#FFF", "#000", "#FF4E36", "#15778E", "#ff5a5f"]]
+    });
+    $("#colorpicker-color").show();
+  });

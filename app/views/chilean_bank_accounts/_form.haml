@@ -1,0 +1,45 @@
+- content_for :title_header do
+  %h1= t("layouts.no_tribe.settings")
+
+= render :partial => "layouts/left_hand_navigation", :locals => { :links => settings_links_for(@current_user, @current_community) }
+
+.centered-section
+  %h2= t("payment_settings.title")
+  %p= t("chilean_bank_accounts.need_info")
+
+  = form_for @chilean_bank_account do |form|
+    = form.label :first_name, t('chilean_bank_accounts.first_name') + "*"
+    = form.text_field :first_name,:class => :text_field, :maxlength => "255", required: true
+
+    = form.label :last_name, t('chilean_bank_accounts.last_name') + "*"
+    = form.text_field :last_name, :class => :text_field, :maxlength => "30", required: true
+
+    = form.label :bank_rut, t('chilean_bank_accounts.bank_rut') + "*"
+    = form.text_field :bank_rut, :class => :text_field, :maxlength => "30", placeholder: 'SIN punto, CON guión. Ejemplo: 4726016-7', required: true      
+
+    = form.label :bank_name, t('chilean_bank_accounts.bank_name') + "*"
+    = form.select :bank_name, options_for_select(ChileanBankAccount.bank_names, form.object.bank_name), { prompt: '-- Seleccionar Banco --' }, required: true
+
+    = form.label :bank_account, t('chilean_bank_accounts.bank_account') + "*"
+    = form.text_field :bank_account, :class => :text_field, :maxlength => "300", required: true
+
+    = form.label :payment_notification_email, t('chilean_bank_accounts.payment_notifcation_email') + "*"
+    = form.text_field :payment_notification_email, :class => :text_field, :maxlength => "300", required: true
+
+    = form.button t('chilean_bank_accounts.submit'), data: { disable_with: t('chilean_bank_accounts.saving') }
+
+- content_for :extra_javascript do
+  :javascript
+    $('.edit_chilean_bank_account').validate({
+       rules: {
+         "chilean_bank_account[first_name]": { required: true },
+         "chilean_bank_account[last_name]": { required: true },
+         "chilean_bank_account[bank_rut]": { required: true },
+         "chilean_bank_account[bank_name]": { required: true },
+         "chilean_bank_account[bank_account]": { required: true, number: true },
+         "chilean_bank_account[payment_notification_email]": { required: true, email: true }
+       },
+       messages: {
+         "chilean_bank_account[bank_account]": { number: 'La cuenta bancaria sólo puede contener números.' }
+       }
+    });

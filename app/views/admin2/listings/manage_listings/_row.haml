@@ -1,0 +1,17 @@
+- opacity = listing.approval_rejected? || listing.closed?
+
+%td{class: "#{'opacity_03' if opacity}"}
+  = link_to listing.title, listing_path(listing), target: :_blank
+  = render 'badges', listing: listing, presenter: presenter
+- if presenter.admin_mode
+  %td{class: "#{'opacity_03' if listing.closed?}"}
+    - p = listing.author
+    - unless p.deleted
+      = link_to person_name(p), person_path(p.username), target: :_blank
+%td{class: "#{'opacity_03' if opacity}"}= l(listing.created_at, format: :short_date)
+%td{class: "#{'opacity_03' if opacity}"}= l(listing.updated_at, format: :short_date)
+%td{class: "#{'opacity_03' if opacity}"}
+  - category = listing.category
+  = link_to category.display_name(I18n.locale), search_path(category: category.url), target: :_blank
+%td.table-actions
+  = render 'actions', presenter: presenter, listing: listing, opacity: opacity

@@ -1,0 +1,15 @@
+<% if @error.present? %>
+  showError('<%= j @error %>');
+<% else %>
+  <% if @allow_id %>
+    allowPost(<%= j @id %>);
+  <% end %>
+  <% if @disallow_id %>
+    disallowPost(<%= j @id %>);
+  <% end %>
+
+  $('.membership-row-<%= @service.membership.id %>').html('<%= j render 'admin2/users/manage_users/one_row', membership: @service.membership %>');
+  var current = $('#status_').val();
+  $('#user_statuses_filter').html('<%= j render 'admin2/users/manage_users/statuses', presenter: @presenter, current: nil %>');
+  $('#status_').val(current);
+<% end %>

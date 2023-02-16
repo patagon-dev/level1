@@ -1,0 +1,21 @@
+- content_for :title do
+  = t('admin2.sidebar.design.cover_photos')
+
+.content-card-header
+  %h1.content-card-header-title
+    = t('admin2.sidebar.design.cover_photos')
+
+  = link_to t('admin2.cover_photos.preview_homepage'), '/?big_cover_photo=true', class: %i[external-link content-card-header-link], target: :_blank
+.content-card-section-container
+  = form_for @current_community, url: update_cover_photos_admin2_design_cover_photos_path, html: { multipart: true, remote: true, class: %i[content-card-section-form form-with-files] }, method: :patch do |form|
+    %section.content-card-section
+      %h2
+        = t('admin2.sidebar.design.cover_photos')
+      %p.ingress
+        = t('admin2.cover_photos.description', href: 'https://help.sharetribe.com/en/articles/666084').html_safe
+      .form-group.cover-photo-div
+        = render 'cover-photo', form: form
+      .form-group.small-cover-photo-div
+        = render 'small-cover-photo', form: form
+    %section.content-card-terminal
+      = render 'admin2/submit_button', caption: t('admin2.save_changes')

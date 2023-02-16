@@ -1,0 +1,16 @@
+- content_for :extra_javascript do
+  :javascript
+    initIntercom();
+
+- content_for :title do
+  = t('admin2.sidebar.payment_system.stripe')
+
+.content-card-header
+  %h1.content-card-header-title
+    = t('admin2.stripe.info_header')
+
+.content-card-section-container#body_stripe
+  = render partial: 'admin2/payment_system/stripe/form_body', locals: local_assigns
+
+- content_for :popup_layout do
+  = render 'disable_stripe_popup'

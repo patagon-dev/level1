@@ -1,0 +1,42 @@
+!!!
+%html{lang: I18n.locale}
+  %head
+    %meta{content: 'text/html; charset=UTF-8', 'http-equiv' => 'Content-Type'}
+    %title= admin_title.html_safe
+    %meta{charset: 'utf-8'}
+    %meta{content: 'width=device-width, initial-scale=1 shrink-to-fit=no', name: 'viewport'}
+    %meta{content: admin_description.html_safe, name: 'description'}
+    %link{rel: 'shortcut icon', type: 'image/icon', href: @current_community.favicon}
+    = render partial: 'analytics/head_scripts', locals: { community: @current_community, user: @current_user, plan: @current_plan }
+    = csrf_meta_tags
+    - font_path = APP_CONFIG[:font_proximasoft_url]
+    - if font_path.present?
+      = render 'layouts/fonts', font_path: font_path
+    = stylesheet_link_tag 'admin2/admin'
+    = javascript_include_tag 'admin2/admin'
+  %body
+    = render partial: 'admin2/mobilemenu', locals: header_props
+    #root
+      = render partial: 'admin2/topnav', locals: header_props
+      = flash_messages
+      .layout-container
+        = render 'admin2/sidebar'
+        %div{ class: layout_class }
+          = yield
+    .mobilemenu-overlay
+    = content_for :popup_layout
+    = javascript_include_tag 'popper.min.js'
+    = javascript_include_tag 'bootstrap.min.js'
+    = render 'layouts/intercom'
+
+    :javascript
+      $(document).ready(function() {
+          window.ST.jsonTranslations = #{ raw JSONTranslations.get(I18n.locale) };
+          translate_validation_messages("#{I18n.locale}");
+      });
+
+    - if logged_in? && @display_expiration_notice
+      = render 'admin2/expired_popup_admin'
+
+    = content_for :extra_javascript
+    = render partial: 'analytics/bottom_scripts'

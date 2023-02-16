@@ -1,0 +1,64 @@
+- content_for :title do
+  = t('admin2.sidebar.advanced.custom_script')
+
+.content-card-header
+  %h1.content-card-header-title
+    = t('admin2.sidebar.advanced.custom_script')
+
+.content-card-section-container
+  = form_for @current_community, url: update_script_admin2_advanced_custom_scripts_path, html: { class: %i[content-card-section-form], remote: true }, method: :patch do |form|
+    %section.content-card-section
+      %h2
+        = t('admin2.sidebar.advanced.custom_script')
+
+      - unless custom_script_enabled?
+        .statusbar.business
+          %span
+            ✨
+            = t('admin2.custom_script.script_disabled', url: admin2_plan_path).html_safe
+
+      %p.ingress
+        = t('admin2.custom_script.info_text', url: 'https://help.sharetribe.com/en/articles/666142').html_safe
+      .form-group
+        = form.label :custom_head_script, t('admin2.custom_script.custom_head_script')
+        .cm-resize-frame
+          = form.text_area :custom_head_script, maxlength: 65535, class: %i[form-control javascript], placeholder: t('admin2.custom_script.custom_head_script_placeholder'), disabled: !custom_script_enabled?
+        %small#twitterHandle-help.form-text
+          = t('admin2.custom_script.custom_head_script_info_text').html_safe
+
+      .form-group
+        = form.label :custom_body_script, t('admin2.custom_script.custom_body_script')
+        .cm-resize-frame
+          = form.text_area :custom_body_script, maxlength: 65535, class: %i[form-control javascript], placeholder: t('admin2.custom_script.custom_body_script_placeholder'), disabled: !custom_script_enabled?
+        %small#twitterHandle-help.form-text
+          = t('admin2.custom_script.custom_body_script_info_text').html_safe
+
+      .form-group
+        = form.label :custom_css_script, t('admin2.custom_script.custom_css_script')
+        .cm-resize-frame
+          = form.text_area :custom_css_script, maxlength: 65535, class: %i[form-control css], placeholder: t('admin2.custom_script.custom_css_script_placeholder'), disabled: !custom_script_enabled?
+        %small#twitterHandle-help.form-text
+          = t('admin2.custom_script.custom_css_script_info_text').html_safe
+
+    - if custom_script_enabled?
+      %section.content-card-terminal{style: 'z-index: 6'}
+        = render 'admin2/submit_button', caption: t('admin2.save_changes')
+
+
+- if custom_script_enabled? && !Rails.env.test?
+  - content_for :extra_javascript do
+    :javascript
+      $("textarea.javascript").each(function() {
+        CodeMirror.fromTextArea($(this).get(0), {
+          lineNumbers: true,
+          lineWrapping: true,
+          mode: 'htmlmixed'
+        });
+      });
+      $("textarea.css").each(function() {
+        CodeMirror.fromTextArea($(this).get(0), {
+          lineNumbers: true,
+          lineWrapping: true,
+          mode: "text/css"
+        });
+      });
